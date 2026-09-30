@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BacheTrack MX — Panel Institucional de Infraestructura Vial</title>
+  <title>BacheTrack | Panel de Control</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="styles.css" />
@@ -12,30 +12,52 @@
 
 <body>
 
-  <!-- CINTILLO INSTITUCIONAL -->
-  <div class="top-bar-gob">
-    <span>GOBIERNO DE MÉXICO — DIRECCIÓN DE OBRAS PÚBLICAS Y MANTENIMIENTO VIAL</span>
-    <span id="label-municipality">Municipio de Orizaba, Ver.</span>
-  </div>
+  <!-- CABECERA PRINCIPAL -->
+<header class="header-portal">
 
-  <!-- ENCABEZADO PRINCIPAL -->
-  <header class="header-gob">
-    <div class="header-brand-wrap">
-      <div class="brand-emblem-gob">🇲🇽</div>
-      <div>
-        <h1 class="brand-title-gob">BacheTrack MX</h1>
-        <p class="brand-subtitle-gob">Sistema de Gestión de Pavimentos e Infraestructura Urbana</p>
+  <div class="header-portal-inner">
+
+    <!-- MARCA -->
+    <div class="brand-official">
+
+      <div class="brand-emblem-gold">
+        <span>BT</span>
       </div>
+
+      <div class="brand-text-single">
+        <h1>BacheTrack</h1>
+        <p>Sistema de Gestión de Infraestructura Vial</p>
+      </div>
+
     </div>
-    <div style="display: flex; align-items: center; gap: 16px;">
-      <div class="user-role-badge" id="badge-user-role">
-        👤 <span id="text-user-role">Cargando perfil...</span>
+
+
+    <!-- USUARIO -->
+    <div class="dashboard-user">
+
+      <div class="dashboard-user-info">
+
+        <span class="dashboard-location" id="label-municipality">
+          Municipio de Orizaba, Veracruz
+        </span>
+
+        <span class="user-role-badge" id="badge-user-role">
+          <span id="text-user-role">
+            Cargando perfil...
+          </span>
+        </span>
+
       </div>
-      <button class="btn-gob-primary" style="padding: 8px 16px; background: #4A1222;" onclick="cerrarSesion()">
-        Cerrar Sesión
+
+      <button
+        class="btn-logout"
+        onclick="cerrarSesion()"
+      >
+        Cerrar sesión
       </button>
     </div>
-  </header>
+  </div>
+</header>
 
   <!-- MÉTRICAS Y RESUMEN INSTITUCIONAL -->
   <section class="metrics-grid">
@@ -63,9 +85,9 @@
     <!-- PANEL DE MAPA -->
     <section class="panel-gob">
       <div class="panel-gob-header">
-        <h2 class="panel-gob-title">🗺️ Cobertura Vial de la Entidad</h2>
+        <h2 class="panel-gob-title">🗺️ Cobertura Vial</h2>
         <button class="btn-gob-primary" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="cargarReportes()">
-          ↻ Sincronizar Mapa
+          ↻ Actualizar Mapa
         </button>
       </div>
       <div id="mapa" style="height: 480px; width: 100%;"></div>
@@ -74,9 +96,9 @@
     <!-- PANEL DE REGISTRO / ACCIONES POR ROL -->
     <section class="panel-gob">
       <div class="panel-gob-header">
-        <h2 class="panel-gob-title" id="title-table-panel">📋 Control de Incidencias Viales</h2>
+        <h2 class="panel-gob-title" id="title-table-panel">Incidencias Viales</h2>
         <button class="btn-gob-primary" id="btn-export" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--gob-verde);" onclick="exportarReportePDF()">
-          📄 Exportar Reporte
+          Exportar Reporte
         </button>
       </div>
       <div class="table-container">
@@ -103,58 +125,18 @@
     </section>
 
   </main>
-
-  <!-- VENTANA EMERGENTE DE BIENVENIDA / CONFIRMACIÓN DE PERFIL -->
-  <div id="welcome-modal" class="modal-overlay">
-    <div class="modal-welcome-card">
-      <div class="modal-welcome-header">
-        <div class="emblem-circle">🇲🇽</div>
-        <div>
-          <h3>Bienvenido al Sistema Nacional Vial</h3>
-          <p>Autenticación Verificada y Asignación de Permisos</p>
-        </div>
-      </div>
-
-      <div class="modal-welcome-body">
-        <div class="user-info-row">
-          <span class="row-label">Nombre del Usuario:</span>
-          <span class="row-val" id="pop-user-name">Ing. Fernando Jiménez Rendón</span>
-        </div>
-
-        <div class="user-info-row">
-          <span class="row-label">Tipo de Usuario / Cargo:</span>
-          <span class="row-val" id="pop-user-role">Mando Superior / Director de Obras Públicas</span>
-        </div>
-
-        <div class="user-info-row">
-          <span class="row-label">Entidad / Municipio:</span>
-          <span class="row-val" id="pop-user-muni">Veracruz — Municipio de Orizaba (Clave 30118)</span>
-        </div>
-
-        <div class="user-info-row">
-          <span class="row-label">Método de Autenticación:</span>
-          <span class="row-val" id="pop-user-method">LLAVE MX (Validado RENAPO) 🔑</span>
-        </div>
-
-        <div class="user-info-row">
-          <span class="row-label">Estado de Acceso:</span>
-          <span class="row-val" style="color:#065F46; font-weight:700;">✅ ACCESO AUTORIZADO</span>
-        </div>
-      </div>
-
-      <div class="modal-welcome-footer">
-        <button class="btn-gob-primary" onclick="cerrarModalBienvenida()">
-          Ingresar al Panel de Control
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- FOOTER -->
   <footer class="footer-gob">
-    <div>Gobierno de México — Sistema Multi-Municipio para la Infraestructura Vial</div>
-    <div id="ultima-sincro">Última actualización: —</div>
-  </footer>
+
+  <div>
+    BacheTrack © 2026
+  </div>
+
+  <div id="ultima-sincro">
+    Última actualización: —
+  </div>
+
+</footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="dashboard.js"></script>

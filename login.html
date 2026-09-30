@@ -4,245 +4,349 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema Nacional de Infraestructura Vial (SINAGIV) — Gobierno de México</title>
+
+  <title>BacheTrack | Sistema Nacional de Infraestructura Vial</title>
 
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
-  <!-- CINTILLO INSTITUCIONAL FEDERAL -->
-  <div class="cintillo-gob">
-    <div class="cintillo-left">
-      <span>GOBIERNO DE MÉXICO</span>
-    </div>
-    <div class="cintillo-links">
-      <a href="https://www.gob.mx" target="_blank">gob.mx</a>
-      <a href="#">Trámites</a>
-      <a href="#">Gobierno</a>
-      <a href="#">Buzón Ciudadano</a>
-    </div>
-  </div>
-
-  <!-- CABECERA INSTITUCIONAL CON LOGO -->
+  <!-- ========================================
+       CABECERA PRINCIPAL
+  ========================================= -->
   <header class="header-portal">
     <div class="header-portal-inner">
+
       <div class="brand-official">
-        <div style="font-size:28px; font-weight:800; color:#FFFFFF; display:flex; align-items:center; gap:10px;">
-          🇲🇽 <span style="font-size:18px; color:#FFFFFF; font-weight:700; letter-spacing:0.5px;">SISTEMA NACIONAL VIAL</span>
+
+        <div class="brand-emblem-gold">
+          <span>BT</span>
         </div>
-        <div class="brand-divider"></div>
-        <div class="brand-text">
-          <h1>SINAGIV — Plataforma Única Municipal</h1>
-          <p>Secretaría de Infraestructura, Comunicaciones y Transportes (SICT)</p>
+
+        <div class="brand-text-single">
+          <h1>BacheTrack</h1>
+          <p>Sistema Nacional de Infraestructura Vial</p>
         </div>
+
       </div>
+
+      <div class="system-status">
+        <span class="status-dot"></span>
+        Sistema en línea
+      </div>
+
     </div>
   </header>
 
-  <!-- CONTENIDO PRINCIPAL DE AUTENTICACIÓN (CENTRADO) -->
+
+  <!-- ========================================
+       CONTENIDO PRINCIPAL
+  ========================================= -->
   <main class="main-wrapper-centered">
 
     <section class="login-card-container">
+
+      <!-- ENCABEZADO DEL LOGIN -->
       <div class="login-card-header">
         <h3>Acceso al Sistema</h3>
-        <p>Inicie sesión mediante Llave MX o Credenciales Institucionales</p>
+        <p>Ingrese sus credenciales para continuar</p>
       </div>
 
-      <!-- PESTAÑAS MÉTODOS DE ACCESO -->
-      <div class="auth-tabs">
-        <button type="button" class="tab-btn active" onclick="switchTab('llave')">
-        Llave MX
-        </button>
-        <button type="button" class="tab-btn" onclick="switchTab('credenciales')">
-        Correo
-        </button>
-      </div>
 
+      <!-- CUERPO DEL LOGIN -->
       <div class="login-card-body">
 
-        <!-- MENSAJE DE ALERTA DINÁMICO -->
+        <!-- MENSAJE DE ALERTA -->
         <div id="alert-msg" class="alert-box">
           <span id="alert-text"></span>
         </div>
 
-        <!-- MÉTODO 1: LLAVE MX (EXCLUSIVO PARA CIUDADANOS / USUARIOS) -->
-        <div id="panel-llave" class="auth-panel-content active">
-          <p style="font-size:12px; color:#4B5563; margin-bottom:18px; line-height:1.5;">
-            Acceso para <strong>Ciudadanos</strong>. Ingrese su <strong>CURP</strong> para autenticar su identidad mediante el registro oficial de LLAVE MX.
-          </p>
 
-          <form id="form-llave" onsubmit="autenticarLlaveMX(event)">
-            <div class="form-group">
-              <label for="llave-curp">CURP (Clave Única de Registro de Población) <span class="req">*</span></label>
-              <input type="text" id="llave-curp" class="form-control uppercase" maxlength="18" placeholder="ej. ABCD012345EFGHIJK6" required />
-              <div class="form-help">Validación de identidad personal mediante RENAPO / Llave MX.</div>
-            </div>
+        <!-- FORMULARIO -->
+        <form id="form-credenciales" onsubmit="autenticarCredenciales(event)">
 
-            <button type="submit" class="btn-llave-official">
-              Iniciar Sesión con LLAVE MX
-            </button>
-          </form>
-        </div>
+          <div class="form-group">
 
-        <!-- MÉTODO 2: CORREO (PARA USUARIOS Y TRABAJADORES INSTITUCIONALES) -->
-        <div id="panel-credenciales" class="auth-panel-content">
-          <p style="font-size:12px; color:#4B5563; margin-bottom:18px; line-height:1.5;">
-            Acceso para <strong>Usuarios y Personal de Gobierno</strong>. Ingrese su correo y contraseña.
-          </p>
+            <label for="user-email">
+              Correo Electrónico
+              <span class="req">*</span>
+            </label>
 
-          <form id="form-credenciales" onsubmit="autenticarCredenciales(event)">
-            <div class="form-group">
-              <label for="user-email">Correo Electrónico <span class="req">*</span></label>
-              <input type="email" id="user-email" class="form-control" placeholder="usuario@municipio.gob.mx" oninput="evaluarEmailAutomatico()" required />
-            </div>
+            <input
+              type="email"
+              id="user-email"
+              class="form-control"
+              placeholder="correo@ejemplo.com"
+              autocomplete="email"
+              required
+            />
 
-            <div class="form-group">
-              <label for="user-pass">Contraseña de Acceso <span class="req">*</span></label>
-              <input type="password" id="user-pass" class="form-control" placeholder="••••••••••••" required />
-            </div>
+          </div>
 
-            <button type="submit" class="btn-submit-gob">
-              <span>Acceder al Sistema</span>
-            </button>
-          </form>
-        </div>
 
-        <!-- AVISO DE PRIVACIDAD INTEGRADO -->
+          <div class="form-group">
+
+            <label for="user-pass">
+              Contraseña
+              <span class="req">*</span>
+            </label>
+
+            <input
+              type="password"
+              id="user-pass"
+              class="form-control"
+              placeholder="••••••••••••"
+              autocomplete="current-password"
+              required
+            />
+
+          </div>
+
+
+          <button type="submit" class="btn-submit-gob">
+            Iniciar sesión
+          </button>
+
+        </form>
+
+
+        <!-- AVISO DE PRIVACIDAD -->
         <div class="privacy-notice">
-          <strong>Aviso de Privacidad Integrado:</strong> Sus datos personales son recabados y protegidos conforme a la <em>Ley General de Protección de Datos Personales en Posesión de Sujetos Obligados</em>. <a href="#">Consulte el aviso completo aquí</a>.
+
+          <strong>Privacidad y seguridad:</strong>
+
+          La información proporcionada se utiliza exclusivamente
+          para la identificación y operación dentro de BacheTrack.
+
+          <a href="#">
+            Consultar aviso de privacidad
+          </a>.
+
         </div>
 
       </div>
+
     </section>
 
   </main>
 
-  <!-- PIE DE PÁGINA OFICIAL DE GOBIERNO -->
+
+  <!-- ========================================
+       PIE DE PÁGINA
+  ========================================= -->
   <footer class="footer-official">
+
     <div class="footer-inner">
-      <div class="footer-col">
-        <h4>Gobierno de México</h4>
-        <p>Sistema Nacional de Infraestructura Vial (SINAGIV). Coordinado por la Secretaría de Infraestructura, Comunicaciones y Transportes (SICT) y la Agencia de Transformación Digital.</p>
-      </div>
 
       <div class="footer-col">
-        <h4>Enlaces Rápidos</h4>
+
+        <h4>BacheTrack</h4>
+
+        <p>
+          Plataforma para el registro, seguimiento y gestión
+          de incidencias en la infraestructura vial.
+        </p>
+
+      </div>
+
+
+      <div class="footer-col">
+
+        <h4>Plataforma</h4>
+
         <ul>
-          <li><a href="https://www.gob.mx/transparencia" target="_blank">Portal de Transparencia</a></li>
-          <li><a href="#">Agencia de Transformación Digital</a></li>
-          <li><a href="#">Catálogo INEGI Municipios</a></li>
-          <li><a href="#">Directorio Oficial</a></li>
+          <li>
+            <a href="#">Acerca de BacheTrack</a>
+          </li>
+
+          <li>
+            <a href="#">Aviso de privacidad</a>
+          </li>
+
+          <li>
+            <a href="#">Términos de uso</a>
+          </li>
         </ul>
+
       </div>
 
+
       <div class="footer-col">
-        <h4>Soporte Técnico</h4>
-        <p>Mesa de Ayuda a Usuarios y Funcionarios:</p>
-        <p style="margin-top:4px; font-weight:700; color:#BC955C;">800-839-1100 (Atención 24/7)</p>
-        <p style="font-size:11px; margin-top:2px;">soporte.sinagiv@gob.mx</p>
+
+        <h4>Soporte</h4>
+
+        <p>Centro de asistencia técnica</p>
+
+        <p style="margin-top:4px; font-weight:700;">
+          soporte@bachetrack.mx
+        </p>
+
       </div>
+
     </div>
+
 
     <div class="footer-bottom">
-      Gobierno de México © 2026 — Todos los derechos reservados conforme a la legislación nacional aplicable.
+      BacheTrack © 2026 — Sistema de Gestión de Infraestructura Vial
     </div>
+
   </footer>
 
+
+  <!-- ========================================
+       JAVASCRIPT
+  ========================================= -->
   <script>
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.auth-panel-content').forEach(p => p.classList.remove('active'));
 
-      if (tabName === 'llave') {
-        event.target.classList.add('active');
-        document.getElementById('panel-llave').classList.add('active');
-      } else if (tabName === 'credenciales') {
-        event.target.classList.add('active');
-        document.getElementById('panel-credenciales').classList.add('active');
-      }
-
-      ocultarAlerta();
-    }
-
+    /*
+     * Mostrar mensajes al usuario
+     */
     function mostrarAlerta(msg, esError = true) {
+
       const box = document.getElementById('alert-msg');
       const text = document.getElementById('alert-text');
-      box.className = 'alert-box visible ' + (esError ? 'error' : 'success');
-      text.textContent = (esError ? '⚠️ ' : '✅ ') + msg;
+
+      box.className =
+        'alert-box visible ' +
+        (esError ? 'error' : 'success');
+
+      text.textContent =
+        (esError ? '⚠️ ' : '✅ ') + msg;
     }
 
+
+    /*
+     * Ocultar mensajes
+     */
     function ocultarAlerta() {
+
       const box = document.getElementById('alert-msg');
+
       box.className = 'alert-box';
     }
 
-    function esCurpValida(curp) {
-      const regexCurp = /^[A-Z]{1}[AEIOUX]{1}[A-Z]{2}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[HM]{1}(AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[0-9A-Z]{1}[0-9]{1}$/i;
-      return regexCurp.test(curp);
-    }
 
-    function autenticarLlaveMX(e) {
+    /*
+     * Autenticación mediante correo y contraseña
+     */
+    function autenticarCredenciales(e) {
+
       e.preventDefault();
-      const curp = document.getElementById('llave-curp').value.trim().toUpperCase();
 
-      if (!esCurpValida(curp)) {
-        mostrarAlerta("La CURP ingresada no tiene una estructura válida conforme al RENAPO.", true);
+      const email =
+        document
+          .getElementById('user-email')
+          .value
+          .trim()
+          .toLowerCase();
+
+      const password =
+        document
+          .getElementById('user-pass')
+          .value;
+
+
+      /*
+       * Validaciones básicas
+       */
+      if (!email || !password) {
+
+        mostrarAlerta(
+          "Ingrese su correo electrónico y contraseña.",
+          true
+        );
+
         return;
       }
 
-      mostrarAlerta("Iniciando sesión con LLAVE MX...", false);
 
-      setTimeout(() => {
-        localStorage.setItem('user_session', JSON.stringify({
-          curp,
-          name: "Fernando Jiménez Rendón",
-          email: `${curp.toLowerCase()}@llave.gob.mx`,
-          role: 'ciudadano',
-          isWorker: false,
-          municipality: "Veracruz — Municipio de Orizaba (Clave 30118)",
-          llave_mx_autenticado: true,
-          showModal: true
-        }));
+      mostrarAlerta(
+        "Verificando credenciales...",
+        false
+      );
 
-        window.location.href = 'dashboard.html';
-      }, 1000);
-    }
 
-    function autenticarCredenciales(e) {
-      e.preventDefault();
-      const email = document.getElementById('user-email').value.trim();
-
-      mostrarAlerta("Iniciando sesión...", false);
+      /*
+       * Datos temporales para la demostración.
+       *
+       * Posteriormente esta parte deberá ser
+       * reemplazada por autenticación real
+       * mediante una API o servidor.
+       */
 
       let role = 'ciudadano';
       let name = 'Fernando Jiménez Rendón';
-      let municipality = 'Veracruz — Municipio de Orizaba';
+      let municipality =
+        'Veracruz — Municipio de Orizaba';
 
-      if (email.includes('.gob.mx') || email.includes('director') || email.includes('admin') || email.includes('obras')) {
+
+      /*
+       * Identificación temporal del rol
+       */
+      if (
+        email.includes('director') ||
+        email.includes('admin') ||
+        email.includes('obras')
+      ) {
+
         role = 'director';
-        name = 'Ing. Fernando Jiménez Rendón';
-        municipality = 'Veracruz — Municipio de Orizaba (Clave 30118)';
-      } else if (email.includes('cuadrilla') || email.includes('operador')) {
-        role = 'operador';
-        name = 'Téc. Carlos Mendoza Silva';
-        municipality = 'Puebla — Municipio de Puebla (Clave 21114)';
+
+        name =
+          'Ing. Fernando Jiménez Rendón';
+
+        municipality =
+          'Veracruz — Municipio de Orizaba (Clave 30118)';
+
       }
 
-      setTimeout(() => {
-        localStorage.setItem('user_session', JSON.stringify({
-          name,
-          email,
-          role,
-          municipality,
-          llave_mx_autenticado: false,
-          showModal: true
-        }));
+      else if (
+        email.includes('cuadrilla') ||
+        email.includes('operador')
+      ) {
 
-        window.location.href = 'dashboard.html';
-      }, 1000);
+        role = 'operador';
+
+        name =
+          'Téc. Carlos Mendoza Silva';
+
+        municipality =
+          'Puebla — Municipio de Puebla (Clave 21114)';
+
+      }
+
+
+      /*
+       * Simulación de autenticación
+       */
+      setTimeout(() => {
+
+        localStorage.setItem(
+          'user_session',
+          JSON.stringify({
+
+            name: name,
+            email: email,
+            role: role,
+            municipality: municipality,
+            showModal: true
+
+          })
+        );
+
+
+        /*
+         * Redirección al panel
+         */
+        window.location.href =
+          'dashboard.html';
+
+      }, 800);
+
     }
+
   </script>
+
 </body>
 
 </html>

@@ -1,14 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
 :root {
-  /* Identidad Oficial GOB.MX */
-  --gob-guinda: #691C32;
-  --gob-guinda-dark: #4A1222;
-  --gob-guinda-light: #80243B;
-  --gob-dorado: #BC955C;
-  --gob-dorado-hover: #A37F47;
-  --gob-verde: #10312B;
-  --gob-gris-oscuro: #285C4D;
+  --gob-guinda: #2B2D30;
+  --gob-guinda-dark: #1D1F21;
+  --gob-guinda-light: #3D4044;
+
+  --gob-dorado: #F5C518;
+  --gob-dorado-hover: #D9AD00;
+
+  --gob-verde: #343A40;
+  --gob-gris-oscuro: #4B5563;
+
+  --bg-page: #F3F4F6;
+  --bg-card: #FFFFFF;
+
+  --border-color: #E1E4E8;
+  --border-focus: #F5C518;
 
   --bg-page: #F3F4F6;
   --bg-card: #FFFFFF;
@@ -71,7 +78,22 @@ body {
 .cintillo-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.gob-logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+
+.cintillo-coat {
+  font-size: 14px;
+}
+
+.cintillo-title {
+  font-weight: 700;
+  letter-spacing: 0.8px;
 }
 
 .cintillo-links {
@@ -91,51 +113,129 @@ body {
   text-decoration: underline;
 }
 
-/* ---- CABECERA PRINCIPAL DEL PORTAL ---- */
 .header-portal,
 .header-gob {
-  background: var(--gob-guinda);
+  background: #242629;
   color: #FFFFFF;
   padding: 16px 36px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow-md);
-  border-bottom: 1px solid var(--gob-guinda-dark);
+  border-bottom: 4px solid #F5C518;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
 }
 
 .header-portal-inner,
 .header-brand-wrap {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+
   display: flex;
   align-items: center;
-  gap: 20px;
+  justify-content: space-between;
 }
 
 .brand-official {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 14px;
 }
 
-.brand-divider {
-  width: 1px;
-  height: 38px;
-  background-color: rgba(255, 255, 255, 0.25);
+.brand-emblem-gold {
+  width: 46px;
+  height: 46px;
+
+  background: #F5C518;
+  color: #202124;
+
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+
+  box-shadow: none;
+  flex-shrink: 0;
 }
 
-.brand-text h1,
-.brand-title-gob {
-  font-size: 20px;
+.brand-text-single {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-text-single h1 {
+  font-size: 21px;
+  font-weight: 800;
+
+  color: #FFFFFF !important;
+
+  letter-spacing: 1.5px;
+  line-height: 1.2;
+}
+
+.brand-text-single p {
+  font-size: 11px;
+  font-weight: 500;
+
+  color: #AEB4BC;
+
+  letter-spacing: 0.2px;
+  margin-top: 3px;
+}
+
+.brand-divider-gold {
+  width: 2px;
+  height: 42px;
+  background: linear-gradient(to bottom, transparent, var(--gob-dorado), transparent);
+  margin: 0 4px;
+}
+
+.brand-portal-title h2 {
+  font-size: 18px;
   font-weight: 700;
   color: #FFFFFF !important;
   line-height: 1.2;
 }
 
-.brand-text p,
-.brand-subtitle-gob {
-  font-size: 12px;
-  color: #D4C19C;
+.brand-portal-title p {
+  font-size: 11px;
+  color: #E5E7EB;
   font-weight: 400;
+}
+
+.header-seal-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(188, 149, 92, 0.6);
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: #FFFFFF;
+}
+
+.seal-icon {
+  font-size: 20px;
+}
+
+.seal-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.seal-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: 0.5px;
+}
+
+.seal-sub {
+  font-size: 10px;
+  color: #D4C19C;
 }
 
 .user-role-badge {
@@ -231,44 +331,6 @@ body {
 
 .auth-panel-content.active {
   display: block;
-}
-
-/* TARJETA DE IDENTIFICACIÓN AUTOMÁTICA DETECTADA EN LOGIN */
-.identity-card {
-  background-color: #ECFDF5;
-  border: 1px solid #6EE7B7;
-  border-left: 4px solid var(--st-reparado);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  box-shadow: var(--shadow-sm);
-}
-
-.identity-icon {
-  font-size: 24px;
-  background: #FFFFFF;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm);
-}
-
-.identity-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--st-reparado);
-}
-
-.identity-muni {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 2px;
 }
 
 .form-group {
@@ -669,7 +731,7 @@ body {
 .footer-col ul li a:hover { color: var(--gob-dorado); }
 
 .footer-bottom {
-  background-color: #330B17;
+  background-color: #282828;
   text-align: center;
   padding: 14px 24px;
   font-size: 11px;
@@ -679,6 +741,8 @@ body {
 
 /* RESPONSIVE */
 @media (max-width: 1024px) {
+  .brand-official { flex-wrap: wrap; }
+  .header-seal-right { display: none; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); }
   .main-dashboard { grid-template-columns: 1fr; }
 }
@@ -688,4 +752,60 @@ body {
   .metrics-grid { grid-template-columns: 1fr; padding: 16px; }
   .main-dashboard { padding: 16px; }
   .cintillo-gob, .top-bar-gob { flex-direction: column; gap: 4px; padding: 8px 16px; text-align: center; }
+}
+
+/* ---- USUARIO DEL DASHBOARD ---- */
+
+.dashboard-user {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.dashboard-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.dashboard-location {
+  color: #AEB4BC;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.user-role-badge {
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+
+  padding: 0;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.btn-logout {
+  background: transparent;
+  color: #FFFFFF;
+
+  border: 1px solid #555A60;
+  border-radius: 6px;
+
+  padding: 9px 16px;
+
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: #F5C518;
+  border-color: #F5C518;
+  color: #202124;
 }

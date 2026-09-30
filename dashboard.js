@@ -1,8 +1,3 @@
-/* =============================================
-   GOBIERNO DE MÉXICO — BACHETRACK MX
-   dashboard.js — Control Institucional por Roles y Ventana Emergente
-   ============================================= */
-
 // ---- VERIFICAR SESIÓN ----
 const rawSession = localStorage.getItem('user_session');
 if (!rawSession) {
@@ -26,53 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('text-user-role').textContent = roleText;
 
-  if (userSession.llave_mx_autenticado) {
-    document.getElementById('text-user-role').textContent += ' • LLAVE MX 🔑';
-  }
-
-  // DESPLEGAR PANTALLA EMERGENTE / MODAL CON LA INFORMACIÓN PERSONAL DEL USUARIO
-  configurarModalBienvenida();
-
   // Cargar datos del mapa y tabla
   cargarReportes();
 });
-
-function configurarModalBienvenida() {
-  const modal = document.getElementById('welcome-modal');
-  if (!modal) return;
-
-  document.getElementById('pop-user-name').textContent = userSession.name || 'Usuario Registrado';
-
-  let roleTitle = 'Usuario Ciudadano (Acceso Ciudadano)';
-  if (userSession.role === 'director') {
-    roleTitle = 'Mando Superior / Director de Obras Públicas';
-  } else if (userSession.role === 'operador') {
-    roleTitle = 'Jefe de Cuadrilla Operativa / Técnico Vial';
-  }
-
-  document.getElementById('pop-user-role').textContent = roleTitle;
-  document.getElementById('pop-user-muni').textContent = userSession.municipality || 'Veracruz — Municipio de Orizaba';
-
-  const methodText = userSession.llave_mx_autenticado
-    ? 'LLAVE MX (Validado RENAPO) 🔑'
-    : 'Correo Electrónico Autenticado ✉️';
-  document.getElementById('pop-user-method').textContent = methodText;
-
-  // Desplegar modal si es un nuevo ingreso
-  if (userSession.showModal !== false) {
-    modal.classList.add('active');
-  }
-}
-
-function cerrarModalBienvenida() {
-  const modal = document.getElementById('welcome-modal');
-  if (modal) {
-    modal.classList.remove('active');
-  }
-  // Marcar como visto
-  userSession.showModal = false;
-  localStorage.setItem('user_session', JSON.stringify(userSession));
-}
 
 function cerrarSesion() {
   localStorage.removeItem('user_session');
@@ -83,7 +34,7 @@ function cerrarSesion() {
 const mapa = L.map('mapa').setView([18.8467, -97.1305], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors | Gobierno de México',
+  attribution: '© OpenStreetMap contributors',
   maxZoom: 19,
 }).addTo(mapa);
 
@@ -144,7 +95,7 @@ async function cambiarEstado(id, nuevoEstado) {
 }
 
 function exportarReportePDF() {
-  alert("Generando Reporte Ejecutivo Oficial en PDF para la Dirección de Obras Públicas...");
+  alert("Generando reporte de incidencias en PDF...");
 }
 
 // ---- METRICAS Y TABLA ----
