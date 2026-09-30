@@ -4,100 +4,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BacheTrack AI — Dashboard Municipal</title>
+  <title>BacheTrack MX — Panel Institucional de Infraestructura Vial</title>
 
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;600;800&display=swap"
-    rel="stylesheet" />
-
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-brand">
-      <span class="brand-icon">◈</span>
+  <!-- CINTILLO INSTITUCIONAL -->
+  <div class="top-bar-gob">
+    <span>GOBIERNO DE MÉXICO — DIRECCIÓN DE OBRAS PÚBLICAS Y MANTENIMIENTO VIAL</span>
+    <span id="label-municipality">Municipio de Orizaba, Ver.</span>
+  </div>
+
+  <!-- ENCABEZADO PRINCIPAL -->
+  <header class="header-gob">
+    <div class="header-brand-wrap">
+      <div class="brand-emblem-gob">🇲🇽</div>
       <div>
-        <h1>BacheTrack <span class="brand-ai">AI</span></h1>
-        <p class="brand-sub">Panel de Control Municipal</p>
+        <h1 class="brand-title-gob">BacheTrack MX</h1>
+        <p class="brand-subtitle-gob">Sistema de Gestión de Pavimentos e Infraestructura Urbana</p>
       </div>
     </div>
-    <div class="header-right">
-      <div class="live-dot"></div>
-      <span class="live-label">EN VIVO</span>
-      <button id="btn-refresh" class="btn-refresh" onclick="cargarReportes()">
-        <span class="refresh-icon">↻</span> Actualizar
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <div class="user-role-badge" id="badge-user-role">
+        👤 <span id="text-user-role">Cargando perfil...</span>
+      </div>
+      <button class="btn-gob-primary" style="padding: 8px 16px; background: #4A1222;" onclick="cerrarSesion()">
+        Cerrar Sesión
       </button>
     </div>
   </header>
 
-  <!-- INDICADORES -->
-  <section class="indicadores">
-    <div class="card-indicador" id="card-total">
-      <span class="ind-numero" id="total-reportes">—</span>
-      <span class="ind-label">Total de reportes</span>
+  <!-- MÉTRICAS Y RESUMEN INSTITUCIONAL -->
+  <section class="metrics-grid">
+    <div class="card-metric-gob">
+      <div class="metric-title">Total de Incidencias</div>
+      <div class="metric-val" id="total-reportes">0</div>
     </div>
-    <div class="card-indicador bajo" id="card-bajo">
-      <span class="semaforo-dot bajo"></span>
-      <span class="ind-numero" id="total-bajo">—</span>
-      <span class="ind-label">Riesgo bajo</span>
+    <div class="card-metric-gob">
+      <div class="metric-title">Reportes Pendientes</div>
+      <div class="metric-val" id="total-pendientes" style="color: #991B1B;">0</div>
     </div>
-    <div class="card-indicador medio" id="card-medio">
-      <span class="semaforo-dot medio"></span>
-      <span class="ind-numero" id="total-medio">—</span>
-      <span class="ind-label">Riesgo medio</span>
+    <div class="card-metric-gob proceso">
+      <div class="metric-title">En Reparación (Cuadrillas)</div>
+      <div class="metric-val" id="total-proceso" style="color: #D97706;">0</div>
     </div>
-    <div class="card-indicador alto" id="card-alto">
-      <span class="semaforo-dot alto"></span>
-      <span class="ind-numero" id="total-alto">—</span>
-      <span class="ind-label">Riesgo alto</span>
+    <div class="card-metric-gob reparado">
+      <div class="metric-title">Baches Atendidos / Reparados</div>
+      <div class="metric-val" id="total-atendidos" style="color: #065F46;">0</div>
     </div>
   </section>
 
-  <!-- SEMÁFORO GLOBAL -->
-  <section class="semaforo-global-wrap">
-    <span class="semaforo-titulo">Nivel de riesgo general de la ciudad:</span>
-    <span id="semaforo-badge" class="semaforo-badge">Cargando…</span>
-  </section>
+  <!-- GRID PRINCIPAL -->
+  <main class="main-dashboard">
 
-  <!-- MAPA + TABLA -->
-  <main class="main-grid">
-
-    <!-- MAPA -->
-    <section class="panel mapa-panel">
-      <div class="panel-header">
-        <span class="panel-title">🗺 Mapa de reportes</span>
-        <span class="panel-hint">Haz clic en un marcador para ver detalle</span>
+    <!-- PANEL DE MAPA -->
+    <section class="panel-gob">
+      <div class="panel-gob-header">
+        <h2 class="panel-gob-title">🗺️ Cobertura Vial de la Entidad</h2>
+        <button class="btn-gob-primary" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="cargarReportes()">
+          ↻ Sincronizar Mapa
+        </button>
       </div>
-      <div id="mapa"></div>
+      <div id="mapa" style="height: 480px; width: 100%;"></div>
     </section>
 
-    <!-- TABLA -->
-    <section class="panel tabla-panel">
-      <div class="panel-header">
-        <span class="panel-title">📋 Reportes recibidos</span>
-        <span id="tabla-count" class="panel-hint"></span>
+    <!-- PANEL DE REGISTRO / ACCIONES POR ROL -->
+    <section class="panel-gob">
+      <div class="panel-gob-header">
+        <h2 class="panel-gob-title" id="title-table-panel">📋 Control de Incidencias Viales</h2>
+        <button class="btn-gob-primary" id="btn-export" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--gob-verde);" onclick="exportarReportePDF()">
+          📄 Exportar Reporte
+        </button>
       </div>
-      <div class="tabla-scroll">
-        <table id="tabla-reportes">
+      <div class="table-container">
+        <table class="table-gob">
           <thead>
             <tr>
-              <th>#ID</th>
-              <th>Descripción</th>
-              <th>Latitud</th>
-              <th>Longitud</th>
+              <th>ID</th>
+              <th>Evidencia</th>
+              <th>Descripción / Ubicación</th>
               <th>Fecha</th>
-              <th>Riesgo</th>
+              <th>Estado</th>
+              <th>Gestión</th>
             </tr>
           </thead>
           <tbody id="tbody-reportes">
             <tr>
-              <td colspan="6" class="td-vacio">Cargando datos…</td>
+              <td colspan="6" style="text-align: center; padding: 24px; color: #6B7280;">
+                Cargando datos del sistema...
+              </td>
             </tr>
           </tbody>
         </table>
@@ -106,13 +104,58 @@
 
   </main>
 
+  <!-- VENTANA EMERGENTE DE BIENVENIDA / CONFIRMACIÓN DE PERFIL -->
+  <div id="welcome-modal" class="modal-overlay">
+    <div class="modal-welcome-card">
+      <div class="modal-welcome-header">
+        <div class="emblem-circle">🇲🇽</div>
+        <div>
+          <h3>Bienvenido al Sistema Nacional Vial</h3>
+          <p>Autenticación Verificada y Asignación de Permisos</p>
+        </div>
+      </div>
+
+      <div class="modal-welcome-body">
+        <div class="user-info-row">
+          <span class="row-label">Nombre del Usuario:</span>
+          <span class="row-val" id="pop-user-name">Ing. Fernando Jiménez Rendón</span>
+        </div>
+
+        <div class="user-info-row">
+          <span class="row-label">Tipo de Usuario / Cargo:</span>
+          <span class="row-val" id="pop-user-role">Mando Superior / Director de Obras Públicas</span>
+        </div>
+
+        <div class="user-info-row">
+          <span class="row-label">Entidad / Municipio:</span>
+          <span class="row-val" id="pop-user-muni">Veracruz — Municipio de Orizaba (Clave 30118)</span>
+        </div>
+
+        <div class="user-info-row">
+          <span class="row-label">Método de Autenticación:</span>
+          <span class="row-val" id="pop-user-method">LLAVE MX (Validado RENAPO) 🔑</span>
+        </div>
+
+        <div class="user-info-row">
+          <span class="row-label">Estado de Acceso:</span>
+          <span class="row-val" style="color:#065F46; font-weight:700;">✅ ACCESO AUTORIZADO</span>
+        </div>
+      </div>
+
+      <div class="modal-welcome-footer">
+        <button class="btn-gob-primary" onclick="cerrarModalBienvenida()">
+          Ingresar al Panel de Control
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
-  <footer class="footer">
-    <span>BacheTrack AI © 2026 — HackaTec</span>
-    <span id="ultima-actualizacion">—</span>
+  <footer class="footer-gob">
+    <div>Gobierno de México — Sistema Multi-Municipio para la Infraestructura Vial</div>
+    <div id="ultima-sincro">Última actualización: —</div>
   </footer>
 
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="dashboard.js"></script>
 </body>

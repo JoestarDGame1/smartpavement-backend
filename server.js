@@ -27,10 +27,7 @@ app.use("/uploads", express.static("uploads"));
 app.use(express.static(__dirname));
 
 app.get("/", (req, res) => {
-  res.json({
-    status: "ok",
-    project: "SmartPavement Guard API"
-  });
+  res.sendFile(path.join(__dirname, "login.html"));
 });
 
 app.post("/register", async (req, res) => {
@@ -187,6 +184,32 @@ app.get("/reports", (req, res) => {
       }
 
       res.json(rows);
+    }
+  );
+});
+
+app.put("/reports/:id/status", (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: "Se requiere un estado válido" });
+  }
+
+  db.run(
+    "UPDATE manual_reports SET status = ? WHERE id = ?",
+    [status, id],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+
+      res.json({
+        success: true,
+        message: "Estado actualizado correctamente",
+        id,
+        status
+      });
     }
   );
 });

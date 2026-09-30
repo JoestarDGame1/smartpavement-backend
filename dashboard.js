@@ -1,58 +1,116 @@
 /* =============================================
-   BacheTrack AI — dashboard.js
-   Consume GET http://192.168.1.239:3000/reports
+   GOBIERNO DE MÉXICO — BACHETRACK MX
+   dashboard.js — Control Institucional por Roles y Ventana Emergente
    ============================================= */
 
-// ---- MAPA ----
-const mapa = L.map('mapa').setView([20.967, -89.623], 13);
+// ---- VERIFICAR SESIÓN ----
+const rawSession = localStorage.getItem('user_session');
+if (!rawSession) {
+  window.location.href = 'login.html';
+}
 
-setTimeout(() => {
-  mapa.invalidateSize();
-}, 300);
+const userSession = JSON.parse(rawSession || '{}');
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '© OpenStreetMap contributors © CARTO',
+document.addEventListener('DOMContentLoaded', () => {
+  // Configurar interfaz según sesión y rol
+  if (userSession.municipality) {
+    document.getElementById('label-municipality').textContent = userSession.municipality;
+  }
+
+  let roleText = 'Ciudadano Registrado';
+  if (userSession.role === 'director') {
+    roleText = 'Director / Superior (Auditoría)';
+  } else if (userSession.role === 'operador') {
+    roleText = 'Operador / Cuadrilla (Técnico)';
+  }
+
+  document.getElementById('text-user-role').textContent = roleText;
+
+  if (userSession.llave_mx_autenticado) {
+    document.getElementById('text-user-role').textContent += ' • LLAVE MX 🔑';
+  }
+
+  // DESPLEGAR PANTALLA EMERGENTE / MODAL CON LA INFORMACIÓN PERSONAL DEL USUARIO
+  configurarModalBienvenida();
+
+  // Cargar datos del mapa y tabla
+  cargarReportes();
+});
+
+function configurarModalBienvenida() {
+  const modal = document.getElementById('welcome-modal');
+  if (!modal) return;
+
+  document.getElementById('pop-user-name').textContent = userSession.name || 'Usuario Registrado';
+
+  let roleTitle = 'Usuario Ciudadano (Acceso Ciudadano)';
+  if (userSession.role === 'director') {
+    roleTitle = 'Mando Superior / Director de Obras Públicas';
+  } else if (userSession.role === 'operador') {
+    roleTitle = 'Jefe de Cuadrilla Operativa / Técnico Vial';
+  }
+
+  document.getElementById('pop-user-role').textContent = roleTitle;
+  document.getElementById('pop-user-muni').textContent = userSession.municipality || 'Veracruz — Municipio de Orizaba';
+
+  const methodText = userSession.llave_mx_autenticado
+    ? 'LLAVE MX (Validado RENAPO) 🔑'
+    : 'Correo Electrónico Autenticado ✉️';
+  document.getElementById('pop-user-method').textContent = methodText;
+
+  // Desplegar modal si es un nuevo ingreso
+  if (userSession.showModal !== false) {
+    modal.classList.add('active');
+  }
+}
+
+function cerrarModalBienvenida() {
+  const modal = document.getElementById('welcome-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+  // Marcar como visto
+  userSession.showModal = false;
+  localStorage.setItem('user_session', JSON.stringify(userSession));
+}
+
+function cerrarSesion() {
+  localStorage.removeItem('user_session');
+  window.location.href = 'login.html';
+}
+
+// ---- INICIALIZAR MAPA DE LEAFLET ----
+const mapa = L.map('mapa').setView([18.8467, -97.1305], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors | Gobierno de México',
   maxZoom: 19,
 }).addTo(mapa);
 
-// Grupo de marcadores (para limpiar al actualizar)
 let marcadoresLayer = L.layerGroup().addTo(mapa);
 
-// ---- COLORES POR RIESGO ----
-const COLORES = {
-  bajo: '#34d399',
-  medio: '#fbbf24',
-  alto: '#f87171',
-};
+function crearIconoOficial(status) {
+  let color = '#991B1B'; // Rojo Guinda (Registrado)
+  if (status === 'en_reparacion' || status === 'proceso' || status === 'en_proceso') {
+    color = '#D97706'; // Ámbar
+  } else if (status === 'atendido' || status === 'reparado') {
+    color = '#065F46'; // Verde Institucional
+  }
 
-// Calcula el nivel de riesgo de una ZONA según cuántos reportes hay cerca
-// Regla del líder: 1-2 = bajo, 3-5 = medio, 6+ = alto
-// Para reportes individuales usamos el conteo total como proxy simple
-function calcularRiesgoGlobal(total) {
-  if (total <= 2) return 'bajo';
-  if (total <= 5) return 'medio';
-  return 'alto';
-}
-
-// Icono de marcador personalizado según riesgo
-function crearIcono(riesgo) {
-  const color = COLORES[riesgo] || '#8888aa';
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-      <path d="M14 0C6.27 0 0 6.27 0 14c0 9.84 14 22 14 22S28 23.84 28 14C28 6.27 21.73 0 14 0z"
-            fill="${color}" opacity="0.9"/>
-      <circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="38" viewBox="0 0 24 24" fill="${color}" stroke="#FFFFFF" stroke-width="1.5">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
     </svg>`;
+
   return L.divIcon({
     html: svg,
     className: '',
-    iconSize: [28, 36],
-    iconAnchor: [14, 36],
-    popupAnchor: [0, -36],
+    iconSize: [30, 38],
+    iconAnchor: [15, 38],
+    popupAnchor: [0, -38],
   });
 }
 
-// ---- FORMATEAR FECHA ----
 function formatearFecha(fechaStr) {
   if (!fechaStr) return '—';
   try {
@@ -66,171 +124,135 @@ function formatearFecha(fechaStr) {
   }
 }
 
-// ---- ACTUALIZAR INDICADORES ----
-function actualizarIndicadores(reportes) {
-  const total = reportes.length;
-  const riesgoGlobal = calcularRiesgoGlobal(total);
+// ---- CAMBIAR ESTADO ----
+async function cambiarEstado(id, nuevoEstado) {
+  try {
+    const res = await fetch(`/reports/${id}/status`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: nuevoEstado })
+    });
 
-  // Conteo por nivel (usamos el riesgoGlobal de cada reporte si existe,
-  // o distribuimos según la regla global como fallback)
-  let bajo = 0, medio = 0, alto = 0;
-  reportes.forEach(r => {
-    const nivel = r.riesgo || r.risk || r.nivel || null;
-    if (nivel) {
-      const n = nivel.toLowerCase();
-      if (n === 'bajo' || n === 'low') bajo++;
-      else if (n === 'medio' || n === 'medium') medio++;
-      else if (n === 'alto' || n === 'high') alto++;
-      else bajo++;
+    if (res.ok) {
+      cargarReportes();
     } else {
-      // Sin campo riesgo: usamos el global como etiqueta de cada registro
-      if (riesgoGlobal === 'bajo') bajo++;
-      else if (riesgoGlobal === 'medio') medio++;
-      else alto++;
+      alert("No se pudo actualizar el estado.");
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function exportarReportePDF() {
+  alert("Generando Reporte Ejecutivo Oficial en PDF para la Dirección de Obras Públicas...");
+}
+
+// ---- METRICAS Y TABLA ----
+function actualizarMetricas(reportes) {
+  let pendientes = 0, proceso = 0, atendidos = 0;
+
+  reportes.forEach(r => {
+    const st = (r.status || 'registrado').toLowerCase();
+    if (st === 'en_reparacion' || st === 'proceso' || st === 'en_proceso') {
+      proceso++;
+    } else if (st === 'atendido' || st === 'reparado') {
+      atendidos++;
+    } else {
+      pendientes++;
     }
   });
 
-  document.getElementById('total-reportes').textContent = total;
-  document.getElementById('total-bajo').textContent = bajo;
-  document.getElementById('total-medio').textContent = medio;
-  document.getElementById('total-alto').textContent = alto;
-
-  // Semáforo global
-  const badge = document.getElementById('semaforo-badge');
-  badge.className = 'semaforo-badge ' + riesgoGlobal;
-  const etiquetas = { bajo: '🟢 Bajo', medio: '🟡 Medio', alto: '🔴 Alto' };
-  badge.textContent = etiquetas[riesgoGlobal];
-
-  return { bajo, medio, alto, riesgoGlobal };
+  document.getElementById('total-reportes').textContent = reportes.length;
+  document.getElementById('total-pendientes').textContent = pendientes;
+  document.getElementById('total-proceso').textContent = proceso;
+  document.getElementById('total-atendidos').textContent = atendidos;
 }
 
-// ---- RENDERIZAR MARCADORES EN MAPA ----
 function renderizarMapa(reportes) {
   marcadoresLayer.clearLayers();
-
   const coords = [];
 
-  reportes.forEach((r, i) => {
-    const lat = parseFloat(r.latitude || r.lat || r.latitud);
-    const lng = parseFloat(r.longitude || r.lng || r.longitud);
+  reportes.forEach((r) => {
+    const lat = parseFloat(r.latitude);
+    const lng = parseFloat(r.longitude);
     if (isNaN(lat) || isNaN(lng)) return;
 
-    const riesgoLocal = r.riesgo || r.risk || r.nivel || calcularRiesgoGlobal(reportes.length);
-    const nivel = riesgoLocal.toLowerCase().includes('alt') ? 'alto'
-      : riesgoLocal.toLowerCase().includes('med') ? 'medio' : 'bajo';
+    const st = (r.status || 'registrado').toLowerCase();
+    const marcador = L.marker([lat, lng], { icon: crearIconoOficial(st) });
 
-    const marcador = L.marker([lat, lng], { icon: crearIcono(nivel) });
+    const fotoHtml = r.image_url
+      ? `<img src="${r.image_url}" style="width:100%;height:110px;object-fit:cover;border-radius:4px;margin-bottom:6px;"/>`
+      : '';
 
-    const popupHtml = `
-      <div class="popup-desc">${r.description || r.descripcion || 'Sin descripción'}</div>
-      <div class="popup-fecha">📅 ${formatearFecha(r.created_at || r.fecha || r.date)}</div>
-      <span class="popup-riesgo ${nivel}">${nivel.toUpperCase()}</span>
-    `;
-    marcador.bindPopup(popupHtml);
+    marcador.bindPopup(`
+      <div style="font-family:Montserrat,sans-serif;max-width:200px;">
+        ${fotoHtml}
+        <strong>${r.description || 'Bache detectado'}</strong><br/>
+        <small>📅 ${formatearFecha(r.created_at)}</small>
+      </div>
+    `);
+
     marcadoresLayer.addLayer(marcador);
     coords.push([lat, lng]);
   });
 
-  // Centrar mapa en los reportes si hay datos
   if (coords.length > 0) {
     mapa.fitBounds(coords, { padding: [40, 40] });
   }
 }
 
-// ---- RENDERIZAR TABLA ----
 function renderizarTabla(reportes) {
   const tbody = document.getElementById('tbody-reportes');
-  const tablaCount = document.getElementById('tabla-count');
-
-  tablaCount.textContent = `${reportes.length} registro(s)`;
 
   if (reportes.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="td-vacio">No hay reportes todavía.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;">No hay incidencias registradas.</td></tr>';
     return;
   }
 
   tbody.innerHTML = reportes.map((r, i) => {
     const id = r.id || (i + 1);
-    const desc = r.description || r.descripcion || '—';
-    const lat = r.latitude || r.lat || r.latitud || '—';
-    const lng = r.longitude || r.lng || r.longitud || '—';
-    const fecha = formatearFecha(r.created_at || r.fecha || r.date);
-    const riesgoLocal = r.riesgo || r.risk || r.nivel || calcularRiesgoGlobal(reportes.length);
-    const nivel = riesgoLocal.toLowerCase().includes('alt') ? 'alto'
-      : riesgoLocal.toLowerCase().includes('med') ? 'medio' : 'bajo';
+    const desc = r.description || 'Sin descripción';
+    const fecha = formatearFecha(r.created_at);
+    const status = (r.status || 'registrado').toLowerCase();
+
+    const fotoHtml = r.image_url
+      ? `<a href="${r.image_url}" target="_blank"><img src="${r.image_url}" style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:1px solid #E5E7EB;"/></a>`
+      : `<span style="font-size:11px;color:#9CA3AF;">Sin foto</span>`;
 
     return `
       <tr>
-        <td>${id}</td>
+        <td><strong>#${id}</strong></td>
+        <td>${fotoHtml}</td>
         <td>${desc}</td>
-        <td>${typeof lat === 'number' ? lat.toFixed(6) : lat}</td>
-        <td>${typeof lng === 'number' ? lng.toFixed(6) : lng}</td>
-        <td>${fecha}</td>
-        <td><span class="badge-riesgo ${nivel}">${nivel}</span></td>
+        <td style="font-size:12px;color:#6B7280;">${fecha}</td>
+        <td><span class="badge-gob ${status}">${status.replace('_', ' ')}</span></td>
+        <td>
+          <select style="padding:4px 8px;border-radius:4px;border:1px solid #CBD5E1;font-family:Montserrat;font-size:12px;" onchange="cambiarEstado(${id}, this.value)">
+            <option value="registrado" ${status === 'registrado' ? 'selected' : ''}>Registrado</option>
+            <option value="en_proceso" ${status === 'en_proceso' || status === 'en_reparacion' ? 'selected' : ''}>En Reparación</option>
+            <option value="reparado" ${status === 'reparado' || status === 'atendido' ? 'selected' : ''}>Reparado / Atendido</option>
+          </select>
+        </td>
       </tr>
     `;
   }).join('');
 }
 
-// ---- MOSTRAR / OCULTAR ERROR ----
-let errorBanner = null;
-function mostrarError(msg) {
-  if (!errorBanner) {
-    errorBanner = document.createElement('div');
-    errorBanner.className = 'error-banner';
-    document.querySelector('.indicadores').insertAdjacentElement('beforebegin', errorBanner);
-  }
-  errorBanner.textContent = '⚠ ' + msg;
-  errorBanner.classList.add('visible');
-}
-function ocultarError() {
-  if (errorBanner) errorBanner.classList.remove('visible');
-}
-
-// ---- FUNCIÓN PRINCIPAL: CARGAR REPORTES ----
 async function cargarReportes() {
-  const btnRefresh = document.getElementById('btn-refresh');
-  const refreshIcon = btnRefresh.querySelector('.refresh-icon');
-
-  // Animación de carga
-  btnRefresh.disabled = true;
-  refreshIcon.style.display = 'inline-block';
-  refreshIcon.style.animation = 'spin 0.6s linear infinite';
-
   try {
     const res = await fetch("/reports");
-
-    if (!res.ok) {
-      throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
-    }
+    if (!res.ok) throw new Error("Error HTTP");
 
     const data = await res.json();
+    const reportes = Array.isArray(data) ? data : (data.reports || []);
 
-    // La API puede devolver un array directo, o { reports: [...] }, o { data: [...] }
-    const reportes = Array.isArray(data)
-      ? data
-      : (data.reports || data.data || data.results || []);
-
-    ocultarError();
-    actualizarIndicadores(reportes);
+    actualizarMetricas(reportes);
     renderizarMapa(reportes);
     renderizarTabla(reportes);
 
-    // Timestamp de última actualización
-    document.getElementById('ultima-actualizacion').textContent =
-      'Última actualización: ' + new Date().toLocaleTimeString('es-MX');
-
-  } catch (err) {
-    console.error('[BacheTrack] Error al cargar reportes:', err);
-    mostrarError(`No se pudo conectar con la API (/reports). ` +
-      'Verifica que el servidor esté corriendo y que ambos dispositivos estén en la misma red.');
-  } finally {
-    btnRefresh.disabled = false;
-    refreshIcon.style.animation = '';
+    document.getElementById('ultima-sincro').textContent =
+      'Última sincronización: ' + new Date().toLocaleTimeString('es-MX');
+  } catch (e) {
+    console.error("Error al cargar reportes:", e);
   }
 }
-
-// ---- ARRANQUE ----
-document.addEventListener('DOMContentLoaded', () => {
-  cargarReportes();
-});
