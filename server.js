@@ -3,27 +3,13 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
-const multer = require("multer");
 const path = require("path");
 
 const db = require("./database");
 const app = express();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + "-" + file.originalname;
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({ storage });
-
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
 app.use(express.static(__dirname));
 
 app.get("/", (req, res) => {
@@ -88,127 +74,6 @@ app.post("/login", (req, res) => {
         success: true,
         userId: user.id,
         email: user.email
-      });
-    }
-  );
-});
-
-app.post("/manual-report", upload.single("photo"), (req, res) => {
-  const { userId, description, latitude, longitude } = req.body;
-
-  const imageUrl = req.file
-    ? `/uploads/${req.file.filename}`
-    : null;
-
-  db.run(
-    `
-    INSERT INTO manual_reports(
-      user_id,
-      description,
-      image_url,
-      latitude,
-      longitude
-    )
-    VALUES(?,?,?,?,?)
-    `,
-    [
-      userId,
-      description,
-      imageUrl,
-      latitude,
-      longitude
-    ],
-    function(err) {
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      res.json({
-        success: true,
-        reportId: this.lastID,
-        imageUrl
-      });
-    }
-  );
-});
-
-app.post("/automatic-report", (req, res) => {
-  const { userId, impact, speed, latitude, longitude } = req.body;
-
-  db.run(
-    `
-    INSERT INTO automatic_reports(
-      user_id,
-      impact,
-      speed,
-      latitude,
-      longitude
-    )
-    VALUES(?,?,?,?,?)
-    `,
-    [userId, impact, speed, latitude, longitude],
-    function(err) {
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      res.json({
-        success: true,
-        reportId: this.lastID
-      });
-    }
-  );
-});
-
-app.get("/automatic-reports", (req, res) => {
-  db.all(
-    "SELECT * FROM automatic_reports ORDER BY id DESC",
-    [],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      res.json(rows);
-    }
-  );
-});
-
-app.get("/reports", (req, res) => {
-  db.all(
-    "SELECT * FROM manual_reports ORDER BY id DESC",
-    [],
-    (err, rows) => {
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      res.json(rows);
-    }
-  );
-});
-
-app.put("/reports/:id/status", (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  if (!status) {
-    return res.status(400).json({ message: "Se requiere un estado válido" });
-  }
-
-  db.run(
-    "UPDATE manual_reports SET status = ? WHERE id = ?",
-    [status, id],
-    function (err) {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-
-      res.json({
-        success: true,
-        message: "Estado actualizado correctamente",
-        id,
-        status
       });
     }
   );

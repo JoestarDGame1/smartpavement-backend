@@ -1,3 +1,15 @@
+// ---- SUPABASE ----
+
+const SUPABASE_URL = 'https://jbalxjjzohyfvwgyvyof.supabase.co';
+
+const SUPABASE_KEY =
+  'sb_publishable_i56ZW1XnhmPLXZ_TLrmfXw_qxPa1yyE';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
 // ---- VERIFICAR SESIÓN ----
 const rawSession = localStorage.getItem('user_session');
 if (!rawSession) {
@@ -188,22 +200,38 @@ function renderizarTabla(reportes) {
     `;
   }).join('');
 }
-
 async function cargarReportes() {
   try {
-    const res = await fetch("/reports");
-    if (!res.ok) throw new Error("Error HTTP");
 
-    const data = await res.json();
-    const reportes = Array.isArray(data) ? data : (data.reports || []);
+    console.log("Consultando reportes desde Supabase...");
+
+    const { data, error } = await supabaseClient
+      .from('reports')
+      .select('*')
+      .order('id', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    const reportes = data || [];
+
+    console.log("Reportes recibidos de Supabase:", reportes);
 
     actualizarMetricas(reportes);
     renderizarMapa(reportes);
     renderizarTabla(reportes);
 
     document.getElementById('ultima-sincro').textContent =
-      'Última sincronización: ' + new Date().toLocaleTimeString('es-MX');
+      'Última sincronización: ' +
+      new Date().toLocaleTimeString('es-MX');
+
   } catch (e) {
-    console.error("Error al cargar reportes:", e);
+
+    console.error(
+      "Error al cargar reportes desde Supabase:",
+      e
+    );
+
   }
 }
