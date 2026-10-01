@@ -1,113 +1,222 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BacheTrack | Panel de Control</title>
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BacheTrack | Gestión Vial</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-  <!-- CABECERA PRINCIPAL -->
-<header class="header-portal">
-
-  <div class="header-portal-inner">
-
-    <!-- MARCA -->
-    <div class="brand-official">
-
-      <div class="brand-emblem-gold">
-        <span>BT</span>
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo">BT</div>
+        <div class="brand-info">
+          <h1>BacheTrack</h1>
+          <span>Sistema de Gestión de Infraestructura Vial</span>
+        </div>
       </div>
 
-      <div class="brand-text-single">
-        <h1>BacheTrack</h1>
-        <p>Sistema de Gestión de Infraestructura Vial</p>
+      <div class="header-user">
+        <div class="user-information">
+          <span class="municipality" id="label-municipality">Municipio de Orizaba, Veracruz</span>
+          <strong id="text-user-role">Cargando perfil...</strong>
+        </div>
+        <span id="badge-user-role" class="role-indicator"></span>
+        <button class="logout-button" onclick="cerrarSesion()">Cerrar sesión</button>
       </div>
-
     </div>
+  </header>
 
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="dashboard-container">
 
-    <!-- USUARIO -->
-    <div class="dashboard-user">
-
-      <div class="dashboard-user-info">
-
-        <span class="dashboard-location" id="label-municipality">
-          Municipio de Orizaba, Veracruz
-        </span>
-
-        <span class="user-role-badge" id="badge-user-role">
-          <span id="text-user-role">
-            Cargando perfil...
-          </span>
-        </span>
-
+    <!-- Encabezado Dashboard -->
+    <section class="dashboard-heading">
+      <div>
+        <span class="section-eyebrow">CENTRO DE CONTROL</span>
+        <h2>Gestión de infraestructura vial</h2>
+        <p>Monitoreo y seguimiento de incidencias detectadas en la red vial del municipio.</p>
       </div>
-
-      <button
-        class="btn-logout"
-        onclick="cerrarSesion()"
-      >
-        Cerrar sesión
+      <button class="refresh-button" onclick="cargarReportes()">
+        <span>↻</span> Actualizar información
       </button>
-    </div>
-  </div>
-</header>
-
-  <!-- MÉTRICAS Y RESUMEN INSTITUCIONAL -->
-  <section class="metrics-grid">
-    <div class="card-metric-gob">
-      <div class="metric-title">Total de Incidencias</div>
-      <div class="metric-val" id="total-reportes">0</div>
-    </div>
-    <div class="card-metric-gob">
-      <div class="metric-title">Reportes Pendientes</div>
-      <div class="metric-val" id="total-pendientes" style="color: #991B1B;">0</div>
-    </div>
-    <div class="card-metric-gob proceso">
-      <div class="metric-title">En Reparación (Cuadrillas)</div>
-      <div class="metric-val" id="total-proceso" style="color: #D97706;">0</div>
-    </div>
-    <div class="card-metric-gob reparado">
-      <div class="metric-title">Baches Atendidos / Reparados</div>
-      <div class="metric-val" id="total-atendidos" style="color: #065F46;">0</div>
-    </div>
-  </section>
-
-  <!-- GRID PRINCIPAL -->
-  <main class="main-dashboard">
-
-    <!-- PANEL DE MAPA -->
-    <section class="panel-gob">
-      <div class="panel-gob-header">
-        <h2 class="panel-gob-title">🗺️ Cobertura Vial</h2>
-        <button class="btn-gob-primary" style="width: auto; padding: 6px 12px; font-size: 12px;" onclick="cargarReportes()">
-          ↻ Actualizar Mapa
-        </button>
-      </div>
-      <div id="mapa" style="height: 480px; width: 100%;"></div>
     </section>
 
-    <!-- PANEL DE REGISTRO / ACCIONES POR ROL -->
-    <section class="panel-gob">
-      <div class="panel-gob-header">
-        <h2 class="panel-gob-title" id="title-table-panel">Incidencias Viales</h2>
-        <button class="btn-gob-primary" id="btn-export" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--gob-verde);" onclick="exportarReportePDF()">
-          Exportar Reporte
-        </button>
+    <!-- Métricas -->
+    <section class="metrics-grid">
+      <article class="metric-card metric-total">
+        <div class="metric-card-header">
+          <span class="metric-label">Total de incidencias</span>
+          <span class="metric-icon">◉</span>
+        </div>
+        <strong class="metric-number" id="total-reportes">0</strong>
+        <span class="metric-description">Incidencias registradas</span>
+      </article>
+
+      <article class="metric-card metric-pending">
+        <div class="metric-card-header">
+          <span class="metric-label">Pendientes</span>
+          <span class="metric-icon">!</span>
+        </div>
+        <strong class="metric-number" id="total-pendientes">0</strong>
+        <span class="metric-description">Requieren atención</span>
+      </article>
+
+      <article class="metric-card metric-progress">
+        <div class="metric-card-header">
+          <span class="metric-label">En reparación</span>
+          <span class="metric-icon">⚒</span>
+        </div>
+        <strong class="metric-number" id="total-proceso">0</strong>
+        <span class="metric-description">Atendidas por cuadrillas</span>
+      </article>
+
+      <article class="metric-card metric-completed">
+        <div class="metric-card-header">
+          <span class="metric-label">Reparadas</span>
+          <span class="metric-icon">✓</span>
+        </div>
+        <strong class="metric-number" id="total-atendidos">0</strong>
+        <span class="metric-description">Incidencias solucionadas</span>
+      </article>
+    </section>
+
+    <!-- Mapa & Resumen Lateral -->
+    <section class="dashboard-map-section">
+      <div class="dashboard-panel map-panel">
+        <div class="panel-header">
+          <div>
+            <span class="panel-eyebrow">MONITOREO GEOGRÁFICO</span>
+            <h3>Mapa de incidencias</h3>
+          </div>
+          <div class="map-legend">
+            <span><i class="legend-dot critical"></i>Crítica</span>
+            <span><i class="legend-dot high"></i>Alta</span>
+            <span><i class="legend-dot medium"></i>Moderada</span>
+            <span><i class="legend-dot low"></i>Leve</span>
+          </div>
+        </div>
+        <div id="mapa" class="dashboard-map"></div>
       </div>
+
+      <aside class="dashboard-panel summary-panel">
+  <div class="panel-header">
+    <div>
+      <span class="panel-eyebrow">ESTADO ACTUAL</span>
+      <h3>Resumen</h3>
+    </div>
+  </div>
+
+  <div class="priority-summary">
+
+    <div class="priority-row priority-critical">
+      <div>
+        <span class="priority-dot"></span>
+        <div>
+          <strong>Crítica</strong>
+          <small>Atención inmediata</small>
+        </div>
+      </div>
+
+      <strong id="resumen-critica">0</strong>
+    </div>
+
+    <div class="priority-row priority-high">
+      <div>
+        <span class="priority-dot"></span>
+        <div>
+          <strong>Alta</strong>
+          <small>Atención prioritaria</small>
+        </div>
+      </div>
+
+      <strong id="resumen-alta">0</strong>
+    </div>
+
+    <div class="priority-row priority-medium">
+      <div>
+        <span class="priority-dot"></span>
+        <div>
+          <strong>Moderada</strong>
+          <small>Seguimiento requerido</small>
+        </div>
+      </div>
+
+      <strong id="resumen-moderada">0</strong>
+    </div>
+
+    <div class="priority-row priority-low">
+      <div>
+        <span class="priority-dot"></span>
+        <div>
+          <strong>Leve</strong>
+          <small>Baja prioridad</small>
+        </div>
+      </div>
+
+      <strong id="resumen-leve">0</strong>
+    </div>
+
+  </div>
+
+  <div class="summary-divider"></div>
+
+  <div class="summary-stat">
+    <span>Reportes verificados</span>
+    <strong id="resumen-verificados">0</strong>
+  </div>
+
+  <div class="summary-stat">
+    <span>Confirmaciones ciudadanas</span>
+    <strong id="resumen-confirmaciones">0</strong>
+  </div>
+</aside>
+    </section>
+
+    <!-- Tabla de Incidencias -->
+    <section class="dashboard-panel reports-panel">
+      <div class="reports-header">
+        <div>
+          <span class="panel-eyebrow">REGISTRO MUNICIPAL</span>
+          <h3 id="title-table-panel">Incidencias viales</h3>
+        </div>
+
+        <div class="reports-actions">
+          <div class="search-box">
+            <span>⌕</span>
+            <input type="text" id="search-report" placeholder="Buscar incidencia...">
+          </div>
+
+          <select id="filter-status" class="filter-select">
+            <option value="all">Todos los reportes</option>
+            <option value="current">Problemas actuales</option>
+            <option value="critical">Críticos</option>
+            <option value="high">Alta prioridad</option>
+            <option value="repairing">En reparación</option>
+            <option value="repaired">Reparados</option>
+            <option value="verified">Verificados</option>
+            <option value="unverified">No verificados</option>
+          </select>
+
+          <button class="export-button" id="btn-export" onclick="exportarReportePDF()">
+            Exportar reporte
+          </button>
+        </div>
+      </div>
+
       <div class="table-container">
-        <table class="table-gob">
+        <table class="reports-table">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>Incidencia</th>
               <th>Evidencia</th>
-              <th>Descripción / Ubicación</th>
+              <th>Descripción</th>
+              <th>Prioridad</th>
+              <th>Confirmaciones</th>
               <th>Fecha</th>
               <th>Estado</th>
               <th>Gestión</th>
@@ -115,9 +224,7 @@
           </thead>
           <tbody id="tbody-reportes">
             <tr>
-              <td colspan="6" style="text-align: center; padding: 24px; color: #6B7280;">
-                Cargando datos del sistema...
-              </td>
+              <td colspan="8" class="table-loading">Cargando incidencias...</td>
             </tr>
           </tbody>
         </table>
@@ -125,31 +232,31 @@
     </section>
 
   </main>
+
+  <!-- PANEL DE DETALLE -->
+  <div class="report-overlay" id="report-overlay"></div>
+  <aside class="report-detail" id="report-detail">
+    <div class="report-detail-header">
+      <div>
+        <span class="panel-eyebrow">DETALLE DE INCIDENCIA</span>
+        <h3 id="detail-report-id">Incidencia</h3>
+      </div>
+      <button class="detail-close" id="detail-close" type="button">×</button>
+    </div>
+    <div class="report-detail-content" id="report-detail-content">
+      <p class="detail-placeholder">Selecciona una incidencia para consultar toda su información.</p>
+    </div>
+  </aside>
+
   <!-- FOOTER -->
-  <footer class="footer-gob">
+  <footer class="app-footer">
+    <span>BacheTrack © 2026</span>
+    <span id="ultima-sincro">Última actualización: —</span>
+  </footer>
 
-  <div>
-    BacheTrack © 2026
-  </div>
-
-  <div id="ultima-sincro">
-    Última actualización: —
-  </div>
-
-</footer>
-
-  <!-- Leaflet -->
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
-
-<!-- Supabase -->
-<script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-</script>
-
-<!-- Tu código -->
-<script src="dashboard.js"></script>
+  <!-- LIBRERÍAS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="dashboard.js"></script>
 </body>
-
 </html>

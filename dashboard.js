@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Cargar datos del mapa y tabla
   cargarReportes();
+
+  document
+  .getElementById('filter-status')
+  .addEventListener('change', aplicarFiltros);
+
+document
+  .getElementById('search-report')
+  .addEventListener('input', aplicarFiltros);
 });
 
 function cerrarSesion() {
@@ -110,6 +118,99 @@ function exportarReportePDF() {
   alert("Generando reporte de incidencias en PDF...");
 }
 
+// ---- FILTROS DE REPORTES ----
+let todosLosReportes = [];
+
+function aplicarFiltros() {
+
+  const filtro = document.getElementById('filter-status').value;
+  const busqueda = document
+    .getElementById('search-report')
+    .value
+    .toLowerCase()
+    .trim();
+
+  let reportesFiltrados = [...todosLosReportes];
+
+  // FILTRO PRINCIPAL
+  switch (filtro) {
+
+    case 'current':
+      reportesFiltrados = reportesFiltrados.filter(r => {
+        const status = (r.status || '').toLowerCase();
+
+        return status !== 'reparado' &&
+               status !== 'atendido';
+      });
+      break;
+
+    case 'critical':
+      reportesFiltrados = reportesFiltrados.filter(r =>
+        Number(r.priority || 0) >= 80
+      );
+      break;
+
+    case 'high':
+      reportesFiltrados = reportesFiltrados.filter(r => {
+        const prioridad = Number(r.priority || 0);
+
+        return prioridad >= 60 && prioridad < 80;
+      });
+      break;
+
+    case 'repairing':
+      reportesFiltrados = reportesFiltrados.filter(r => {
+        const status = (r.status || '').toLowerCase();
+
+        return status === 'en_proceso' ||
+               status === 'en_reparacion' ||
+               status === 'proceso';
+      });
+      break;
+
+    case 'repaired':
+      reportesFiltrados = reportesFiltrados.filter(r => {
+        const status = (r.status || '').toLowerCase();
+
+        return status === 'reparado' ||
+               status === 'atendido';
+      });
+      break;
+
+    case 'verified':
+      reportesFiltrados = reportesFiltrados.filter(r =>
+        r.verified === true
+      );
+      break;
+
+    case 'unverified':
+      reportesFiltrados = reportesFiltrados.filter(r =>
+        r.verified !== true
+      );
+      break;
+  }
+
+  // BUSCADOR
+  if (busqueda !== '') {
+
+    reportesFiltrados = reportesFiltrados.filter(r => {
+
+      const texto = `
+        ${r.id || ''}
+        ${r.description || ''}
+        ${r.status || ''}
+        ${r.category || ''}
+        ${r.priority || ''}
+      `.toLowerCase();
+
+      return texto.includes(busqueda);
+    });
+  }
+
+  renderizarTabla(reportesFiltrados);
+  renderizarMapa(reportesFiltrados);
+}
+
 // ---- METRICAS Y TABLA ----
 function actualizarMetricas(reportes) {
   let pendientes = 0, proceso = 0, atendidos = 0;
@@ -129,6 +230,50 @@ function actualizarMetricas(reportes) {
   document.getElementById('total-pendientes').textContent = pendientes;
   document.getElementById('total-proceso').textContent = proceso;
   document.getElementById('total-atendidos').textContent = atendidos;
+}
+
+
+function actualizarResumen(reportes) {
+
+  let critica = 0;
+  let alta = 0;
+  let moderada = 0;
+  let leve = 0;
+
+  let verificados = 0;
+  let confirmaciones = 0;
+
+  reportes.forEach(r => {
+
+    const prioridad = Number(r.priority || 0);
+
+    // Clasificación por prioridad
+    if (prioridad >= 80) {
+      critica++;
+    } else if (prioridad >= 60) {
+      alta++;
+    } else if (prioridad >= 30) {
+      moderada++;
+    } else {
+      leve++;
+    }
+
+    // Reportes verificados
+    if (r.verified === true) {
+      verificados++;
+    }
+
+    // Total de confirmaciones ciudadanas
+    confirmaciones += Number(r.confirmations || 0);
+  });
+
+  document.getElementById('resumen-critica').textContent = critica;
+  document.getElementById('resumen-alta').textContent = alta;
+  document.getElementById('resumen-moderada').textContent = moderada;
+  document.getElementById('resumen-leve').textContent = leve;
+
+  document.getElementById('resumen-verificados').textContent = verificados;
+  document.getElementById('resumen-confirmaciones').textContent = confirmaciones;
 }
 
 function renderizarMapa(reportes) {
@@ -168,38 +313,133 @@ function renderizarTabla(reportes) {
   const tbody = document.getElementById('tbody-reportes');
 
   if (reportes.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;">No hay incidencias registradas.</td></tr>';
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" class="table-loading">
+          No hay incidencias registradas.
+        </td>
+      </tr>
+    `;
     return;
   }
 
   tbody.innerHTML = reportes.map((r, i) => {
+
     const id = r.id || (i + 1);
     const desc = r.description || 'Sin descripción';
     const fecha = formatearFecha(r.created_at);
     const status = (r.status || 'registrado').toLowerCase();
 
+    const prioridadNumero = Number(r.priority || 0);
+    let prioridadTexto = 'Leve';
+    let prioridadClase = 'low';
+
+    if (prioridadNumero >= 80) {
+      prioridadTexto = 'Crítica';
+      prioridadClase = 'critical';
+    } else if (prioridadNumero >= 60) {
+      prioridadTexto = 'Alta';
+      prioridadClase = 'high';
+    } else if (prioridadNumero >= 30) {
+      prioridadTexto = 'Moderada';
+      prioridadClase = 'medium';
+    }
+
+    const confirmaciones = Number(r.confirmations || 0);
+
     const fotoHtml = r.image_url
-      ? `<a href="${r.image_url}" target="_blank"><img src="${r.image_url}" style="width:44px;height:44px;object-fit:cover;border-radius:4px;border:1px solid #E5E7EB;"/></a>`
-      : `<span style="font-size:11px;color:#9CA3AF;">Sin foto</span>`;
+      ? `
+        <a href="${r.image_url}" target="_blank">
+          <img
+            src="${r.image_url}"
+            class="report-thumbnail"
+            alt="Evidencia de incidencia #${id}"
+          >
+        </a>
+      `
+      : `<span class="no-photo">Sin foto</span>`;
 
     return `
       <tr>
-        <td><strong>#${id}</strong></td>
-        <td>${fotoHtml}</td>
-        <td>${desc}</td>
-        <td style="font-size:12px;color:#6B7280;">${fecha}</td>
-        <td><span class="badge-gob ${status}">${status.replace('_', ' ')}</span></td>
+
+        <!-- INCIDENCIA -->
         <td>
-          <select style="padding:4px 8px;border-radius:4px;border:1px solid #CBD5E1;font-family:Montserrat;font-size:12px;" onchange="cambiarEstado(${id}, this.value)">
-            <option value="registrado" ${status === 'registrado' ? 'selected' : ''}>Registrado</option>
-            <option value="en_proceso" ${status === 'en_proceso' || status === 'en_reparacion' ? 'selected' : ''}>En Reparación</option>
-            <option value="reparado" ${status === 'reparado' || status === 'atendido' ? 'selected' : ''}>Reparado / Atendido</option>
+          <strong>#${id}</strong>
+        </td>
+
+        <!-- EVIDENCIA -->
+        <td>
+          ${fotoHtml}
+        </td>
+
+        <!-- DESCRIPCIÓN -->
+        <td>
+          ${desc}
+        </td>
+
+        <!-- PRIORIDAD -->
+        <td>
+          <span class="priority-badge ${prioridadClase}">
+            ${prioridadTexto}
+          </span>
+          <small class="priority-value">
+            ${prioridadNumero}
+          </small>
+        </td>
+
+        <!-- CONFIRMACIONES -->
+        <td>
+          <span class="confirmation-count">
+            ${confirmaciones}
+          </span>
+        </td>
+
+        <!-- FECHA -->
+        <td class="report-date">
+          ${fecha}
+        </td>
+
+        <!-- ESTADO -->
+        <td>
+          <span class="badge-gob ${status}">
+            ${status.replaceAll('_', ' ')}
+          </span>
+        </td>
+
+        <!-- GESTIÓN -->
+        <td>
+          <select
+            class="status-select"
+            onchange="cambiarEstado(${id}, this.value)"
+          >
+            <option
+              value="registrado"
+              ${status === 'registrado' ? 'selected' : ''}
+            >
+              Registrado
+            </option>
+
+            <option
+              value="en_proceso"
+              ${status === 'en_proceso' || status === 'en_reparacion' ? 'selected' : ''}
+            >
+              En reparación
+            </option>
+
+            <option
+              value="reparado"
+              ${status === 'reparado' || status === 'atendido' ? 'selected' : ''}
+            >
+              Reparado
+            </option>
           </select>
         </td>
+
       </tr>
     `;
   }).join('');
 }
+
 async function cargarReportes() {
   try {
 
@@ -216,11 +456,14 @@ async function cargarReportes() {
 
     const reportes = data || [];
 
-    console.log("Reportes recibidos de Supabase:", reportes);
+// Guardamos una copia de todos los reportes
+todosLosReportes = reportes;
 
-    actualizarMetricas(reportes);
-    renderizarMapa(reportes);
-    renderizarTabla(reportes);
+console.log("Reportes recibidos de Supabase:", reportes);
+
+actualizarMetricas(reportes);
+renderizarMapa(reportes);
+renderizarTabla(reportes);
 
     document.getElementById('ultima-sincro').textContent =
       'Última sincronización: ' +
